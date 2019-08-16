@@ -571,6 +571,9 @@ message Platform {
 // * The files, directories and symlinks in the directory must each be sorted
 //   in lexicographical order by path. The path strings must be sorted by code
 //   point, equivalently, by UTF-8 bytes.
+// * The [NodeProperties][build.bazel.remote.execution.v2.DirectoryNode] of
+//   files, directories, and symlinks must be sorted in lexographical order by
+//   property name.
 //
 // A `Directory` that obeys the restrictions is said to be in canonical form.
 //
@@ -587,6 +590,9 @@ message Platform {
 //       digest: {
 //         hash: "4a73bc9d03...",
 //         size: 65534
+//       },
+//       properties: {
+//         "mtime": "2017-01-15T01:30:15.01Z"
 //       }
 //     }
 //   ],
@@ -626,6 +632,25 @@ message Directory {
   repeated SymlinkNode symlinks = 3;
 }
 
+// A single property for [FileNodes][build.bazel.remote.execution.v2.FileNode],
+// [DirectoryNodes][build.bazel.remote.execution.v2.DirectoryNode], and
+// [SymlinkNodes][build.bazel.remote.execution.v2.SymlinkNode]. The server is
+// responsible for specifying the property `name`s that it accepts. If
+// permitted by the server, the same `name` may occur multiple times.
+//
+// The server is also responsible for specifying the interpretation of
+// property `value`s. For instance, a property describing the mtime of a
+// [FileNode][build.bazel.remote.execution.v2.FileNode] may be interpreted as
+// the lowest value which must can fulfill a request for a file with the
+// requested name, size, and content.
+message NodeProperty {
+    // The property name.
+    string name = 1;
+
+    // The property value.
+    string value = 2;
+}
+
 // A `FileNode` represents a single file and associated metadata.
 message FileNode {
   // The name of the file.
@@ -638,6 +663,9 @@ message FileNode {
 
   // True if file is executable, false otherwise.
   bool is_executable = 4;
+
+  // The FileNode properties
+  repeated NodeProperty properties = 5;
 }
 
 // A `DirectoryNode` represents a child of a
@@ -652,6 +680,9 @@ message DirectoryNode {
   // represented. See [Digest][build.bazel.remote.execution.v2.Digest]
   // for information about how to take the digest of a proto message.
   Digest digest = 2;
+
+  // The DirectoryNode properties
+  repeated NodeProperty properties = 3;
 }
 
 // A `SymlinkNode` represents a symbolic link.
@@ -666,6 +697,9 @@ message SymlinkNode {
   // API. The canonical form forbids the substrings `/./` and `//` in the target
   // path. `..` components are allowed anywhere in the target path.
   string target = 2;
+
+  // The SymlinkNode properties
+  repeated NodeProperty properties = 3;
 }
 
 // A content digest. A digest for a given blob consists of the size of the blob
