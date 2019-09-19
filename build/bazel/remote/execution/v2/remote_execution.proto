@@ -944,6 +944,9 @@ message OutputFile {
   // message. The server MAY omit inlining, even if requested, and MUST do so if inlining
   // would cause the response to exceed message size limits.
   bytes contents = 5;
+
+  // The properties of the output file
+  repeated NodeProperty properties = 6;
 }
 
 // A `Tree` contains all the
@@ -975,6 +978,9 @@ message OutputDirectory {
   // [Tree][build.bazel.remote.execution.v2.Tree] proto containing the
   // directory's contents.
   Digest tree_digest = 3;
+
+  // The properties of the output directory
+  repeated NodeProperty properties = 4;
 }
 
 // An `OutputSymlink` is similar to a
@@ -995,6 +1001,9 @@ message OutputSymlink {
   // API. The canonical form forbids the substrings `/./` and `//` in the target
   // path. `..` components are allowed anywhere in the target path.
   string target = 2;
+
+  // The properties of the output symlink
+  repeated NodeProperty properties = 3;
 }
 
 // An `ExecutionPolicy` can be used to control the scheduling of the action.
